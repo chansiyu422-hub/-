@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>我的私人保险箱</title>
+<style>
+    /* 深色模式风格，看起来更私密 */
+    body { font-family: -apple-system, sans-serif; background-color: #1a1a1a; color: #fff; margin: 0; padding: 0; height: 100vh; overflow: hidden; }
+    
+    /* === 登录层 === */
+    #login-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+    .lock-icon { font-size: 50px; margin-bottom: 20px; }
+    .pin-input { font-size: 24px; padding: 10px; text-align: center; border-radius: 10px; border: 1px solid #333; background: #222; color: white; width: 200px; letter-spacing: 5px; outline: none; }
+    .btn-unlock { margin-top: 20px; padding: 12px 40px; border-radius: 25px; background: #007aff; color: white; border: none; font-size: 16px; font-weight: bold; cursor: pointer; }
+    
+    /* === 内容层 === */
+    #app-layer { padding: 20px; height: 100%; overflow-y: auto; display: none; padding-bottom: 100px; box-sizing: border-box; }
+    
+    /* 添加按钮 */
+    .fab-add { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: #007aff; border-radius: 50%; color: white; font-size: 30px; border: none; box-shadow: 0 4px 15px rgba(0,122,255,0.4); cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 100; }
+    
+    /* 卡片样式 */
+    .card { background: #2c2c2e; border-radius: 12px; padding: 15px; margin-bottom: 15px; position: relative; border-left: 4px solid #007aff; }
+    .card-title { font-size: 18px; font-weight: bold; margin-bottom: 10px; display: flex; justify-content: space-between; }
+    .card-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 14px; color: #aaa; }
+    .card-val { color: #fff; font-family: monospace; font-size: 16px; margin-right: 10px; }
+    .btn-copy { background: #3a3a3c; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer; }
+    .btn-eye { background: none; border: none; font-size: 16px; cursor: pointer; margin-left: 5px; }
+    .delete-card { color: #ff453a; font-size: 12px; background: none; border: 1px solid #ff453a; padding: 2px 6px; border-radius: 4px; cursor: pointer;}
+
+    /* 添加表单模态框 */
+    #modal-add { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200; display: none; justify-content: center; align-items: center; }
+    .modal-content { background: #2c2c2e; width: 85%; padding: 20px; border-radius: 15px; }
+    .input-field { width: 100%; padding: 12px; margin: 10px 0; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 8px; box-sizing: border-box; font-size: 16px;}
+    .modal-btns { display: flex; gap: 10px; margin-top: 10px; }
+    .btn-save { flex: 1; padding: 12px; background: #30d158; color: white; border: none; border-radius: 8px; font-weight: bold; }
+    .btn-cancel { flex: 1; padding: 12px; background: #3a3a3c; color: white; border: none; border-radius: 8px; }
+
+    /* 提示条 */
+    #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.9); color: black; padding: 10px 20px; border-radius: 20px; opacity: 0; transition: 0.3s; z-index: 1000; pointer-events: none; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<div id="toast">已复制</div>
+
+<!-- 1. 登录/解锁界面 -->
+<div id="login-layer">
+    <div class="lock-icon">🔒</div>
+    <h3 id="lock-msg">请输入解锁密码</h3>
+    <input type="password" id="pin-input" class="pin-input" maxlength="6" inputmode="numeric" placeholder="******">
+    <button class="btn-unlock" onclick="checkPin()">解锁进入</button>
+    <div style="margin-top:20px; color:#555; font-size:12px;" id="first-run-hint"></div>
+</div>
+
+<!-- 2. 主界面 -->
+<div id="app-layer">
+    <h2 style="margin-top:10px;">我的账号库</h2>
+    <div id="card-list">
+        <!-- 卡片会在这里生成 -->
+    </div>
+</div>
+
+<!-- 悬浮添加按钮 -->
+<button class="fab-add" onclick="showModal()">+</button>
+
+<!-- 3. 添加账号的弹窗 -->
+<div id="modal-add">
+    <div class="modal-content">
+        <h3>新增账号</h3>
+        <input type="text" id="in-title" class="input-field" placeholder="名称 (如: 工行储蓄卡)">
+        <input type="text" id="in-acc" class="input-field" placeholder="账号/卡号">
+        <input type="text" id="in-pwd" class="input-field" placeholder="密码 (或提示)">
+        <div class="modal-btns">
+            <button class="btn-cancel" onclick="closeModal()">取消</button>
+            <button class="btn-save" onclick="saveNewItem()">保存</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // === 核心逻辑 ===
+    const STORE_KEY = 'my_secret_vault_v1';
+    const PIN_KEY = 'my_secret_pin';
+    let userPin = localStorage.getItem(PIN_KEY);
+    let vaultData = JSON.parse(localStorage.getItem(STORE_KEY)) || [];
+
+    // 初始化检查
+    window.onload = function() {
+        if (!userPin) {
+            document.getElementById('lock-msg').innerText = "🆕 设置新密码 (请牢记!)";
+            document.getElementById('first-run-hint').innerText = "首次使用，请设置你的进入密码";
+        }
+    }
+
+    // 1. 解锁/设置密码逻辑
+    function checkPin() {
+        const input = document.getElementById('pin-input').value;
+        if (!input) return;
+
+        if (!userPin) {
+            // 第一次使用，设置密码
+            userPin = input;
+            localStorage.setItem(PIN_KEY, userPin);
+            alert("密码设置成功！下次请使用此密码解锁。");
+            unlockApp();
+        } else {
+            // 验证密码
+            if (input === userPin) {
+                unlockApp();
+            } else {
+                alert("密码错误！");
+                document.getElementById('pin-input').value = '';
+            }
+        }
+    }
+
+    function unlockApp() {
+        document.getElementById('login-layer').style.display = 'none';
+        document.getElementById('app-layer').style.display = 'block';
+        renderList();
+    }
+
+    // 2. 渲染列表
+    function renderList() {
+        const container = document.getElementById('card-list');
+        container.innerHTML = '';
+        
+        vaultData.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <div class="card-title">
+                    ${item.title}
+                    <button class="delete-card" onclick="deleteItem(${index})">删除</button>
+                </div>
+                <div class="card-row">
+                    <span>账号:</span>
+                    <div>
+                        <span class="card-val">${item.acc}</span>
+                        <button class="btn-copy" onclick="copyText('${item.acc}')">复制</button>
+                    </div>
+                </div>
+                <div class="card-row">
+                    <span>密码:</span>
+                    <div style="display:flex; align-items:center;">
+                        <span class="card-val" id="pwd-${index}">••••••</span>
+                        <button class="btn-eye" onclick="togglePwd(${index}, '${item.pwd}')">👁️</button>
+                        <button class="btn-copy" onclick="copyText('${item.pwd}')">复制</button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    // 3. 交互功能：显示/隐藏密码
+    function togglePwd(index, realPwd) {
+        const span = document.getElementById(`pwd-${index}`);
+        if (span.innerText === '••••••') {
+            span.innerText = realPwd;
+        } else {
+            span.innerText = '••••••';
+        }
+    }
+
+    // 4. 交互功能：复制
+    function copyText(text) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        
+        // 显示提示
+        const toast = document.getElementById('toast');
+        toast.style.opacity = 1;
+        setTimeout(() => toast.style.opacity = 0, 1500);
+    }
+
+    // 5. 数据管理：新增
+    function showModal() { document.getElementById('modal-add').style.display = 'flex'; }
+    function closeModal() { document.getElementById('modal-add').style.display = 'none'; }
+
+    function saveNewItem() {
+        const title = document.getElementById('in-title').value;
+        const acc = document.getElementById('in-acc').value;
+        const pwd = document.getElementById('in-pwd').value;
+
+        if (!title) { alert("至少写个名称吧"); return; }
+
+        vaultData.push({ title, acc, pwd });
+        localStorage.setItem(STORE_KEY, JSON.stringify(vaultData));
+        
+        // 清空表单
+        document.getElementById('in-title').value = '';
+        document.getElementById('in-acc').value = '';
+        document.getElementById('in-pwd').value = '';
+        
+        closeModal();
+        renderList();
+    }
+
+    // 6. 数据管理：删除
+    function deleteItem(index) {
+        if(confirm("确定要删除这条记录吗？")) {
+            vaultData.splice(index, 1);
+            localStorage.setItem(STORE_KEY, JSON.stringify(vaultData));
+            renderList();
+        }
+    }
+</script>
+</body>
+</html>
