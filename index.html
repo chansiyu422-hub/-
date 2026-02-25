@@ -6,99 +6,46 @@
 <title>我的多彩卡包 Pro</title>
 <script src='https://unpkg.com/tesseract.js@4.0.2/dist/tesseract.min.js'></script>
 <style>
-    :root {
-        --bg-color: #f2f6f9;
-        --text-dark: #333333;
-        --text-gray: #888888;
-    }
+    :root { --bg-color: #f2f6f9; --text-dark: #333; }
+    body { font-family: -apple-system, sans-serif; background-color: var(--bg-color); color: var(--text-dark); margin: 0; padding: 0; height: 100vh; overflow: hidden; }
 
-    body {
-        font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
-        background-color: var(--bg-color);
-        color: var(--text-dark);
-        margin: 0;
-        padding: 0;
-        height: 100vh;
-        overflow: hidden;
-    }
+    /* 登录层 */
+    #login-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; z-index: 999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+    .pin-input { font-size: 28px; padding: 15px; text-align: center; border-radius: 20px; border: none; background: #f0f2f5; width: 200px; letter-spacing: 8px; outline: none; }
+    .btn-unlock { margin-top: 40px; padding: 15px 80px; border-radius: 40px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; font-size: 18px; font-weight: bold; }
 
-    /* === 1. 登录层 === */
-    #login-layer {
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: #ffffff;
-        z-index: 999;
-        display: flex; flex-direction: column; justify-content: center; align-items: center;
-    }
-    .pin-input {
-        font-size: 28px; padding: 15px; text-align: center;
-        border-radius: 20px; border: none; background: #f0f2f5;
-        width: 200px; letter-spacing: 8px; outline: none;
-    }
-    .btn-unlock {
-        margin-top: 40px; padding: 15px 80px; border-radius: 40px;
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        color: white; border: none; font-size: 18px; font-weight: bold; cursor: pointer;
-    }
+    /* 主界面 */
+    #app-layer { height: 100%; overflow-y: auto; display: none; box-sizing: border-box; -webkit-overflow-scrolling: touch; }
+    .main-title { padding: 30px 20px 10px 20px; font-size: 28px; font-weight: 800; display: flex; justify-content: space-between; align-items: center; }
 
-    /* === 2. 主界面：吸顶优化 === */
-    #app-layer {
-        height: 100%; overflow-y: auto; display: none;
-        box-sizing: border-box;
-        -webkit-overflow-scrolling: touch; /* 优化iOS滚动 */
-    }
+    /* 卡片列表容器 */
+    #card-list { padding: 10px 20px 160px 20px; }
 
-    .main-title {
-        position: sticky; top: 0; z-index: 100;
-        background: rgba(242, 246, 249, 0.9);
-        backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-        padding: 15px 20px;
-        display: flex; flex-direction: column; gap: 10px;
-        border-bottom: 1px solid rgba(0,0,0,0.05);
-    }
-    .title-row { display: flex; justify-content: space-between; align-items: center; }
-    .tool-row { display: flex; gap: 10px; }
-    .tool-btn { 
-        background: #fff; border: 1px solid #ddd; padding: 6px 12px; 
-        border-radius: 10px; font-size: 12px; color: #666; font-weight: bold;
-    }
-
-    #card-list { padding: 10px 20px 120px 20px; }
-
-    /* === 3. 多彩卡片 === */
-    .card {
-        border-radius: 24px; padding: 20px; margin-bottom: 20px;
-        position: relative; overflow: hidden;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-    }
+    /* 多彩卡片样式 */
+    .card { border-radius: 24px; padding: 20px; margin-bottom: 20px; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
     .theme-1 { background: linear-gradient(135deg, #84fab0, #8fd3f4); }
     .theme-2 { background: linear-gradient(135deg, #e0c3fc, #8ec5fc); }
     .theme-3 { background: linear-gradient(135deg, #a18cd1, #fbc2eb); }
     .theme-4 { background: linear-gradient(135deg, #fccb90, #d57eeb); }
-
     .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; position: relative; z-index: 2; }
     .card-name { font-size: 18px; font-weight: bold; color: white; flex: 1; }
     .btn-delete { background: rgba(255,255,255,0.3); border: none; color: white; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; }
-
     .card-content-box { background: #ffffff; border-radius: 16px; padding: 15px; position: relative; z-index: 2; }
     .info-label { font-size: 11px; color: #999; margin-bottom: 4px; }
     .info-value-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
     .info-value { font-size: 15px; color: #333; font-weight: 500; word-break: break-all; max-width: 70%; }
     .capsule-btn { background: #f0f2f5; color: #666; padding: 5px 10px; border-radius: 20px; font-size: 12px; border: none; font-weight: bold; }
 
-    /* 悬浮按钮 */
-    .fab-add {
-        position: fixed; bottom: 30px; right: 25px;
-        width: 60px; height: 60px; background: #333; border-radius: 50%;
-        color: white; font-size: 30px; border: none; box-shadow: 0 8px 20px rgba(0,0,0,0.3); z-index: 100;
-    }
+    /* === 悬浮球系统 === */
+    .fab-container { position: fixed; bottom: 30px; right: 25px; display: flex; flex-direction: column; gap: 15px; align-items: center; z-index: 100; }
+    .float-btn { width: 50px; height: 50px; border-radius: 50%; border: none; color: white; font-weight: bold; font-size: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; }
+    .btn-backup { background: #667eea; }
+    .btn-import { background: #764ba2; }
+    .btn-add { width: 65px; height: 65px; background: #333; font-size: 36px; }
 
-    /* 弹窗 */
-    .modal {
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px);
-        z-index: 200; display: none; justify-content: center; align-items: center;
-    }
-    .modal-content { background: white; width: 80%; max-width: 350px; padding: 25px; border-radius: 30px; box-shadow: 0 15px 40px rgba(0,0,0,0.1); }
+    /* 弹窗样式 */
+    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); z-index: 200; display: none; justify-content: center; align-items: center; }
+    .modal-content { background: white; width: 80%; max-width: 350px; padding: 25px; border-radius: 30px; position: relative; }
     .input-field { width: 100%; padding: 14px; margin-bottom: 15px; background: #f7f8fa; border: 1px solid #eee; border-radius: 12px; box-sizing: border-box; outline: none; }
     #loading-mask { position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.9); border-radius:30px; display:none; flex-direction:column; justify-content:center; align-items:center; z-index:300; }
 </style>
@@ -117,40 +64,34 @@
 
 <div id="app-layer">
     <div class="main-title">
-        <div class="title-row">
-            <span style="font-size:24px; font-weight:800;">我的卡包</span>
-            <span style="font-size:12px; color:#999;">本地加密存储</span>
-        </div>
-        <div class="tool-row">
-            <button class="tool-btn" onclick="exportData()">备份(导出)</button>
-            <button class="tool-btn" onclick="triggerImport()">恢复(导入)</button>
-        </div>
+        <span>我的卡包</span>
+        <span style="font-size:14px; color:#999; font-weight:normal;">Pro v2.0</span>
     </div>
     <div id="card-list"></div>
 </div>
 
-<button class="fab-add" onclick="showModal()">+</button>
+<div class="fab-container">
+    <button class="float-btn btn-backup" onclick="exportData()">备份<br>导出</button>
+    <button class="float-btn btn-import" onclick="triggerImport()">恢复<br>导入</button>
+    <button class="float-btn btn-add" onclick="showModal()">+</button>
+</div>
 
 <div id="modal-add" class="modal">
-    <div class="modal-content" style="position:relative;">
+    <div class="modal-content">
         <div id="loading-mask">识别中...</div>
         <h3 id="modal-title" style="text-align:center; margin-top:0;">添加新卡片</h3>
-        
-        <input type="text" id="in-title" class="input-field" placeholder="名称 (如: 微信)">
-        
+        <input type="text" id="in-title" class="input-field" placeholder="名称">
         <div style="position:relative">
             <input type="text" id="in-acc" class="input-field" placeholder="账号">
             <button onclick="startOCR('in-acc')" style="position:absolute; right:10px; top:10px; border:none; background:none; font-size:18px;">📷</button>
         </div>
-
         <div style="position:relative">
             <input type="text" id="in-pwd" class="input-field" placeholder="密码">
             <button onclick="startOCR('in-pwd')" style="position:absolute; right:10px; top:10px; border:none; background:none; font-size:18px;">📷</button>
         </div>
-
         <div style="display:flex; gap:10px; margin-top:10px;">
-            <button onclick="closeModal()" style="flex:1; padding:12px; border-radius:12px; border:none; background:#f0f2f5; color:#666; font-weight:bold;">取消</button>
-            <button onclick="saveItem()" style="flex:1; padding:12px; border-radius:12px; border:none; background:#333; color:white; font-weight:bold;">保存</button>
+            <button onclick="closeModal()" style="flex:1; padding:12px; border-radius:12px; background:#f0f2f5; border:none; color:#666;">取消</button>
+            <button onclick="saveItem()" style="flex:1; padding:12px; border-radius:12px; background:#333; color:white; border:none;">保存</button>
         </div>
     </div>
 </div>
@@ -160,7 +101,7 @@
     const PIN_KEY = 'colorful_vault_pin';
     
     let userPin = localStorage.getItem(PIN_KEY);
-    // 兼容旧版本数据读取
+    // 兼容旧数据
     let oldData = localStorage.getItem('cyber_vault_data') || localStorage.getItem('vault_ocr_v1');
     let vaultData = JSON.parse(localStorage.getItem(STORE_KEY)) || (oldData ? JSON.parse(oldData) : []);
     
@@ -174,7 +115,7 @@
         if(!val) return;
         if(!userPin) {
             userPin = val; localStorage.setItem(PIN_KEY, val);
-            alert("密码设置成功！"); unlockApp();
+            alert("设置成功"); unlockApp();
         } else if(val === userPin) { unlockApp(); } 
         else { alert("密码错误"); document.getElementById('pin-input').value = ''; }
     }
@@ -218,13 +159,10 @@
         });
     }
 
-    /* 修改/保存逻辑 */
     function showModal() {
         editIndex = null;
         document.getElementById('modal-title').innerText = "添加新卡片";
-        document.getElementById('in-title').value = '';
-        document.getElementById('in-acc').value = '';
-        document.getElementById('in-pwd').value = '';
+        document.getElementById('in-title').value = ''; document.getElementById('in-acc').value = ''; document.getElementById('in-pwd').value = '';
         document.getElementById('modal-add').style.display = 'flex';
     }
 
@@ -242,22 +180,17 @@
         const title = document.getElementById('in-title').value;
         const acc = document.getElementById('in-acc').value;
         const pwd = document.getElementById('in-pwd').value;
-        if(!title || !acc) return alert("名称和账号不能为空");
+        if(!title || !acc) return alert("名称和账号必填");
 
-        if(editIndex !== null) {
-            vaultData[editIndex] = { title, acc, pwd };
-        } else {
-            vaultData.unshift({ title, acc, pwd });
-        }
+        if(editIndex !== null) { vaultData[editIndex] = { title, acc, pwd }; } 
+        else { vaultData.unshift({ title, acc, pwd }); }
         
         localStorage.setItem(STORE_KEY, JSON.stringify(vaultData));
-        closeModal();
-        renderList();
+        closeModal(); renderList();
     }
 
-    /* 导出备份 */
     function exportData() {
-        if(vaultData.length === 0) return alert("没有数据可供备份");
+        if(vaultData.length === 0) return alert("无数据");
         const dataStr = JSON.stringify(vaultData, null, 2);
         const blob = new Blob([dataStr], { type: "application/json" });
         const url = URL.createObjectURL(blob);
@@ -268,7 +201,6 @@
         URL.revokeObjectURL(url);
     }
 
-    /* 恢复导入 */
     function triggerImport() { document.getElementById('import-file-input').click(); }
     document.getElementById('import-file-input').onchange = function(e) {
         const file = e.target.files[0];
@@ -277,21 +209,19 @@
         reader.onload = function(evt) {
             try {
                 const imported = JSON.parse(evt.target.result);
-                if(confirm("导入将覆盖当前手机上的所有卡片，确定吗？")) {
+                if(confirm("确定覆盖现有卡片吗？")) {
                     vaultData = imported;
                     localStorage.setItem(STORE_KEY, JSON.stringify(vaultData));
-                    renderList();
-                    alert("恢复成功！");
+                    renderList(); alert("恢复成功");
                 }
-            } catch(e) { alert("文件格式错误"); }
+            } catch(e) { alert("文件无效"); }
         };
         reader.readAsText(file);
         e.target.value = '';
     };
 
-    /* 辅助函数 */
     function closeModal() { document.getElementById('modal-add').style.display = 'none'; }
-    function deleteItem(index) { if(confirm("确定删除吗？")) { vaultData.splice(index,1); localStorage.setItem(STORE_KEY, JSON.stringify(vaultData)); renderList(); } }
+    function deleteItem(index) { if(confirm("删除吗？")) { vaultData.splice(index,1); localStorage.setItem(STORE_KEY, JSON.stringify(vaultData)); renderList(); } }
     function copyText(txt) {
         const input = document.createElement('textarea'); input.value = txt; document.body.appendChild(input);
         input.select(); document.execCommand('copy'); document.body.removeChild(input); alert("已复制");
@@ -301,7 +231,6 @@
         el.innerText = el.innerText === '••••••' ? (pwd || ' ') : '••••••';
     }
 
-    /* OCR 逻辑 */
     function startOCR(id) { currentTargetInputId = id; document.getElementById('ocr-file-input').click(); }
     document.getElementById('ocr-file-input').onchange = function(e) {
         const file = e.target.files[0];
@@ -310,10 +239,7 @@
         Tesseract.recognize(file, 'chi_sim+eng').then(({ data: { text } }) => {
             document.getElementById('loading-mask').style.display = 'none';
             document.getElementById(currentTargetInputId).value = text.replace(/\s+/g, '');
-        }).catch(err => {
-            document.getElementById('loading-mask').style.display = 'none';
-            alert("识别失败");
-        });
+        }).catch(err => { document.getElementById('loading-mask').style.display = 'none'; alert("OCR失败"); });
     };
 </script>
 </body>
