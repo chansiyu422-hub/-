@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>多彩卡包 Pro</title>
+<title>My Password</title>
 
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -14,16 +14,14 @@
     :root { --bg-color: #f2f6f9; --text-dark: #333; }
     body { font-family: -apple-system, sans-serif; background-color: var(--bg-color); color: var(--text-dark); margin: 0; padding: 0; height: 100vh; overflow: hidden; }
 
-    /* 登录层 */
     #login-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; z-index: 999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
     .pin-input { font-size: 28px; padding: 15px; text-align: center; border-radius: 20px; border: none; background: #f0f2f5; width: 200px; letter-spacing: 8px; outline: none; }
     .btn-unlock { margin-top: 40px; padding: 15px 80px; border-radius: 40px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; font-size: 18px; font-weight: bold; }
 
-    /* 主界面 */
     #app-layer { height: 100%; overflow-y: auto; display: none; box-sizing: border-box; -webkit-overflow-scrolling: touch; }
     .main-title { padding: 40px 20px 10px 20px; font-size: 28px; font-weight: 800; }
 
-    #card-list { padding: 10px 20px 180px 20px; }
+    #card-list { padding: 10px 20px 220px 20px; }
 
     .card { border-radius: 24px; padding: 20px; margin-bottom: 20px; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
     .theme-1 { background: linear-gradient(135deg, #84fab0, #8fd3f4); }
@@ -40,32 +38,31 @@
     .info-value { font-size: 15px; color: #333; font-weight: 500; word-break: break-all; max-width: 65%; }
     .capsule-btn { background: #f0f2f5; color: #666; padding: 5px 12px; border-radius: 20px; font-size: 12px; border: none; font-weight: bold; }
 
-    /* === 悬浮球系统优化 === */
-    .fab-container { position: fixed; bottom: 40px; right: 25px; display: flex; flex-direction: column; gap: 15px; align-items: center; z-index: 100; }
+    /* 悬浮球系统 */
+    .fab-container { position: fixed; bottom: 40px; right: 20px; display: flex; flex-direction: column; gap: 12px; align-items: center; z-index: 100; }
     
-    /* 玻璃拟态按钮样式 */
     .float-btn-glass { 
-        width: 50px; height: 50px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.4); 
-        color: #333; font-size: 10px; font-weight: bold; cursor: pointer;
+        width: 48px; height: 48px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.5); 
+        color: #444; font-size: 10px; font-weight: bold; cursor: pointer;
         display: flex; align-items: center; justify-content: center; text-align: center;
-        background: rgba(255, 255, 255, 0.4); /* 降低透明度 */
-        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); /* 模糊效果 */
+        background: rgba(255, 255, 255, 0.4); 
+        backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
         box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     }
 
-    /* 主加号按钮 - 修正居中 */
     .btn-add { 
-        width: 65px; height: 65px; background: #333; border-radius: 50%; border: none;
-        color: white; font-size: 40px; cursor: pointer;
-        display: flex; align-items: center; justify-content: center; /* Flex居中 */
+        width: 64px; height: 64px; background: #333; border-radius: 50%; border: none;
+        color: white; font-size: 42px; cursor: pointer;
+        display: flex; align-items: center; justify-content: center; 
         box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-        line-height: 1; padding: 0; padding-bottom: 5px; /* 微调视觉中心 */
+        padding: 0; margin-top: 5px;
     }
+    .btn-add span { margin-top: -6px; } /* 视觉居中微调 */
 
-    /* 弹窗样式 */
+    /* 弹窗 */
     .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 200; display: none; justify-content: center; align-items: center; }
-    .modal-content { background: white; width: 85%; max-width: 350px; padding: 25px; border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); }
-    .input-field { width: 100%; padding: 14px; margin-bottom: 15px; background: #f7f8fa; border: 1px solid #eee; border-radius: 12px; box-sizing: border-box; outline: none; }
+    .modal-content { background: white; width: 85%; max-width: 350px; padding: 25px; border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); position: relative;}
+    .input-field { width: 100%; padding: 14px; margin-bottom: 15px; background: #f7f8fa; border: 1px solid #eee; border-radius: 12px; box-sizing: border-box; outline: none; font-size: 16px; }
     #loading-mask { position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.9); border-radius:30px; display:none; flex-direction:column; justify-content:center; align-items:center; z-index:300; }
 </style>
 </head>
@@ -76,17 +73,18 @@
 
 <div id="login-layer">
     <div style="font-size:60px; margin-bottom:20px;">🔐</div>
-    <div id="pin-msg" style="margin-bottom:20px; font-weight:bold; color:#666;">安全验证</div>
+    <div id="pin-msg" style="margin-bottom:20px; font-weight:bold; color:#666;">请输入 6 位 PIN 码</div>
     <input type="tel" id="pin-input" class="pin-input" maxlength="6" placeholder="••••••">
-    <button class="btn-unlock" onclick="checkPin()">开启卡包</button>
+    <button class="btn-unlock" onclick="checkPin()">验证进入</button>
 </div>
 
 <div id="app-layer">
-    <div class="main-title">我的卡包</div>
+    <div class="main-title">My Password</div>
     <div id="card-list"></div>
 </div>
 
 <div class="fab-container">
+    <button class="float-btn-glass" onclick="showResetPin()">修改<br>密码</button>
     <button class="float-btn-glass" onclick="exportData()">备份<br>导出</button>
     <button class="float-btn-glass" onclick="triggerImport()">恢复<br>导入</button>
     <button class="btn-add" onclick="showModal()"><span>+</span></button>
@@ -95,8 +93,8 @@
 <div id="modal-add" class="modal">
     <div class="modal-content">
         <div id="loading-mask">识别中...</div>
-        <h3 id="modal-title" style="text-align:center; margin-top:0;">添加新卡片</h3>
-        <input type="text" id="in-title" class="input-field" placeholder="应用名称 (如: 百度)">
+        <h3 id="modal-title" style="text-align:center; margin-top:0;">添加卡片</h3>
+        <input type="text" id="in-title" class="input-field" placeholder="应用名称">
         <div style="position:relative">
             <input type="text" id="in-acc" class="input-field" placeholder="账号">
             <button onclick="startOCR('in-acc')" style="position:absolute; right:10px; top:10px; border:none; background:none; font-size:18px;">📷</button>
@@ -106,8 +104,20 @@
             <button onclick="startOCR('in-pwd')" style="position:absolute; right:10px; top:10px; border:none; background:none; font-size:18px;">📷</button>
         </div>
         <div style="display:flex; gap:10px; margin-top:10px;">
-            <button onclick="closeModal()" style="flex:1; padding:12px; border-radius:15px; background:#f0f2f5; border:none; color:#666; font-weight:bold;">取消</button>
-            <button onclick="saveItem()" style="flex:1; padding:12px; border-radius:15px; background:#333; color:white; border:none; font-weight:bold;">保存</button>
+            <button onclick="closeModal()" style="flex:1; padding:14px; border-radius:15px; background:#f0f2f5; border:none; color:#666; font-weight:bold;">取消</button>
+            <button onclick="saveItem()" style="flex:1; padding:14px; border-radius:15px; background:#333; color:white; border:none; font-weight:bold;">保存</button>
+        </div>
+    </div>
+</div>
+
+<div id="modal-pin" class="modal">
+    <div class="modal-content">
+        <h3 style="text-align:center; margin-top:0;">修改 PIN 码</h3>
+        <input type="tel" id="old-pin" class="input-field" maxlength="6" placeholder="输入旧 PIN 码">
+        <input type="tel" id="new-pin" class="input-field" maxlength="6" placeholder="输入新 6 位 PIN 码">
+        <div style="display:flex; gap:10px; margin-top:10px;">
+            <button onclick="closePinModal()" style="flex:1; padding:14px; border-radius:15px; background:#f0f2f5; border:none; color:#666; font-weight:bold;">取消</button>
+            <button onclick="resetPin()" style="flex:1; padding:14px; border-radius:15px; background:#667eea; color:white; border:none; font-weight:bold;">确认修改</button>
         </div>
     </div>
 </div>
@@ -117,21 +127,20 @@
     const PIN_KEY = 'colorful_vault_pin';
     
     let userPin = localStorage.getItem(PIN_KEY);
-    let oldData = localStorage.getItem('cyber_vault_data') || localStorage.getItem('vault_ocr_v1');
-    let vaultData = JSON.parse(localStorage.getItem(STORE_KEY)) || (oldData ? JSON.parse(oldData) : []);
+    let vaultData = JSON.parse(localStorage.getItem(STORE_KEY)) || [];
     let editIndex = null; 
     let currentTargetInputId = '';
 
-    window.onload = () => { if(!userPin) document.getElementById('pin-msg').innerText = "首次使用，请设置6位密码"; };
+    window.onload = () => { if(!userPin) document.getElementById('pin-msg').innerText = "首次使用，请设置 6 位 PIN 码"; };
 
     function checkPin() {
         const val = document.getElementById('pin-input').value;
-        if(!val) return;
+        if(val.length < 6) return;
         if(!userPin) {
             userPin = val; localStorage.setItem(PIN_KEY, val);
             unlockApp();
         } else if(val === userPin) { unlockApp(); } 
-        else { alert("密码错误"); document.getElementById('pin-input').value = ''; }
+        else { alert("PIN 码错误"); document.getElementById('pin-input').value = ''; }
     }
 
     function unlockApp() {
@@ -172,12 +181,28 @@
         });
     }
 
+    /* PIN 修改逻辑 */
+    function showResetPin() { document.getElementById('modal-pin').style.display = 'flex'; }
+    function closePinModal() { document.getElementById('modal-pin').style.display = 'none'; }
+    function resetPin() {
+        const oldP = document.getElementById('old-pin').value;
+        const newP = document.getElementById('new-pin').value;
+        if(oldP !== userPin) return alert("旧密码错误");
+        if(newP.length < 6) return alert("新密码必须为 6 位");
+        userPin = newP;
+        localStorage.setItem(PIN_KEY, newP);
+        alert("PIN 码修改成功！");
+        closePinModal();
+        document.getElementById('old-pin').value = '';
+        document.getElementById('new-pin').value = '';
+    }
+
+    /* 卡片管理逻辑 */
     function showModal() {
         editIndex = null; document.getElementById('modal-title').innerText = "添加新卡片";
         document.getElementById('in-title').value = ''; document.getElementById('in-acc').value = ''; document.getElementById('in-pwd').value = '';
         document.getElementById('modal-add').style.display = 'flex';
     }
-
     function showEdit(index) {
         editIndex = index; const item = vaultData[index];
         document.getElementById('modal-title').innerText = "修改卡片信息";
@@ -186,7 +211,6 @@
         document.getElementById('in-pwd').value = item.pwd;
         document.getElementById('modal-add').style.display = 'flex';
     }
-
     function saveItem() {
         const title = document.getElementById('in-title').value;
         const acc = document.getElementById('in-acc').value;
@@ -197,16 +221,17 @@
         localStorage.setItem(STORE_KEY, JSON.stringify(vaultData));
         closeModal(); renderList();
     }
+    function closeModal() { document.getElementById('modal-add').style.display = 'none'; }
 
+    /* 导入导出 */
     function exportData() {
-        if(vaultData.length === 0) return alert("暂无数据可备份");
+        if(vaultData.length === 0) return alert("暂无数据");
         const blob = new Blob([JSON.stringify(vaultData, null, 2)], { type: "application/json" });
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = `卡包备份_${new Date().toLocaleDateString()}.json`;
+        a.download = `备份_${new Date().toLocaleDateString()}.json`;
         a.click();
     }
-
     function triggerImport() { document.getElementById('import-file-input').click(); }
     document.getElementById('import-file-input').onchange = function(e) {
         const file = e.target.files[0]; if(!file) return;
@@ -214,16 +239,16 @@
         reader.onload = function(evt) {
             try {
                 const data = JSON.parse(evt.target.result);
-                if(confirm("确定恢复备份并覆盖当前数据吗？")) {
+                if(confirm("恢复将覆盖当前所有数据，确定？")) {
                     vaultData = data; localStorage.setItem(STORE_KEY, JSON.stringify(vaultData)); renderList();
                 }
-            } catch(e) { alert("文件格式无效"); }
+            } catch(e) { alert("无效文件"); }
         };
         reader.readAsText(file);
     };
 
-    function closeModal() { document.getElementById('modal-add').style.display = 'none'; }
-    function deleteItem(index) { if(confirm("删除后无法找回，确定？")) { vaultData.splice(index,1); localStorage.setItem(STORE_KEY, JSON.stringify(vaultData)); renderList(); } }
+    /* 工具函数 */
+    function deleteItem(index) { if(confirm("确定删除？")) { vaultData.splice(index,1); localStorage.setItem(STORE_KEY, JSON.stringify(vaultData)); renderList(); } }
     function copyText(txt) {
         const input = document.createElement('textarea'); input.value = txt; document.body.appendChild(input);
         input.select(); document.execCommand('copy'); document.body.removeChild(input); alert("已复制");
@@ -233,6 +258,7 @@
         el.innerText = el.innerText === '••••••' ? (pwd || ' ') : '••••••';
     }
 
+    /* OCR */
     function startOCR(id) { currentTargetInputId = id; document.getElementById('ocr-file-input').click(); }
     document.getElementById('ocr-file-input').onchange = function(e) {
         const file = e.target.files[0]; if(!file) return;
