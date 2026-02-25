@@ -2,8 +2,13 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>我的多彩卡包 Pro</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>多彩卡包 Pro</title>
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE4MCIgaGVpZ2h0PSIxODAiIHJ4PSI0MCIgZmlsbD0idXJsKCNwYWludDBfbGluZWFyXzFfMikiLz48cGF0aCBkPSJNOTAgNDVDNzYuMTkyIDQ1IDY1IDU2LjE5MiA2NSA3MEM2NSA4MC4yMDggNzEuNDY0IDg4Ljg4NCA4MC41IDkyLjA0NlYxMjVINTV2MTBIMTA1VjEyNUg5OVY5Mi4wNDZDMTA4LjUzNiA4OC44ODQgMTE1IDgwLjIwOCAxMTUgNzBDMTE1IDU2LjE5MiAxMDMuODA4IDQ1IDkwIDQ1Wk05MCA4NUM4MS43MTYgODUgNzUgNzguMjg0IDc1IDcwQzc1IDYxLjcxNiA4MS43MTYgNTUgOTAgNTVDOTguMjg0IDU1IDEwNSA2MS43MTYgMTA1IDcwQzEwNSA3OC4yODQgOTguMjg0IDg1IDkwIDg1WiIgZmlsbD0id2hpdGUiLz48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9InBhaW50MF9saW5lYXJfMV8yIiB4MT0iMCIgeTE9IjAiIHgyPSIxODAiIHkyPSIxODAiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj48c3RvcCBzdG9wLWNvbG9yPSIjNjY3RUVBIi8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjNzY0QkEyIi8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PC9zdmc+">
+
 <script src='https://unpkg.com/tesseract.js@4.0.2/dist/tesseract.min.js'></script>
 <style>
     :root { --bg-color: #f2f6f9; --text-dark: #333; }
@@ -16,36 +21,50 @@
 
     /* 主界面 */
     #app-layer { height: 100%; overflow-y: auto; display: none; box-sizing: border-box; -webkit-overflow-scrolling: touch; }
-    .main-title { padding: 30px 20px 10px 20px; font-size: 28px; font-weight: 800; display: flex; justify-content: space-between; align-items: center; }
+    .main-title { padding: 40px 20px 10px 20px; font-size: 28px; font-weight: 800; }
 
-    /* 卡片列表容器 */
-    #card-list { padding: 10px 20px 160px 20px; }
+    #card-list { padding: 10px 20px 180px 20px; }
 
-    /* 多彩卡片样式 */
     .card { border-radius: 24px; padding: 20px; margin-bottom: 20px; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
     .theme-1 { background: linear-gradient(135deg, #84fab0, #8fd3f4); }
     .theme-2 { background: linear-gradient(135deg, #e0c3fc, #8ec5fc); }
     .theme-3 { background: linear-gradient(135deg, #a18cd1, #fbc2eb); }
     .theme-4 { background: linear-gradient(135deg, #fccb90, #d57eeb); }
     .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; position: relative; z-index: 2; }
-    .card-name { font-size: 18px; font-weight: bold; color: white; flex: 1; }
-    .btn-delete { background: rgba(255,255,255,0.3); border: none; color: white; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; }
+    .card-name { font-size: 18px; font-weight: bold; color: white; }
+    .btn-delete { background: rgba(255,255,255,0.3); border: none; color: white; width: 30px; height: 30px; border-radius: 50%; font-size: 16px; }
+
     .card-content-box { background: #ffffff; border-radius: 16px; padding: 15px; position: relative; z-index: 2; }
     .info-label { font-size: 11px; color: #999; margin-bottom: 4px; }
     .info-value-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .info-value { font-size: 15px; color: #333; font-weight: 500; word-break: break-all; max-width: 70%; }
-    .capsule-btn { background: #f0f2f5; color: #666; padding: 5px 10px; border-radius: 20px; font-size: 12px; border: none; font-weight: bold; }
+    .info-value { font-size: 15px; color: #333; font-weight: 500; word-break: break-all; max-width: 65%; }
+    .capsule-btn { background: #f0f2f5; color: #666; padding: 5px 12px; border-radius: 20px; font-size: 12px; border: none; font-weight: bold; }
 
-    /* === 悬浮球系统 === */
-    .fab-container { position: fixed; bottom: 30px; right: 25px; display: flex; flex-direction: column; gap: 15px; align-items: center; z-index: 100; }
-    .float-btn { width: 50px; height: 50px; border-radius: 50%; border: none; color: white; font-weight: bold; font-size: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; }
-    .btn-backup { background: #667eea; }
-    .btn-import { background: #764ba2; }
-    .btn-add { width: 65px; height: 65px; background: #333; font-size: 36px; }
+    /* === 悬浮球系统优化 === */
+    .fab-container { position: fixed; bottom: 40px; right: 25px; display: flex; flex-direction: column; gap: 15px; align-items: center; z-index: 100; }
+    
+    /* 玻璃拟态按钮样式 */
+    .float-btn-glass { 
+        width: 50px; height: 50px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.4); 
+        color: #333; font-size: 10px; font-weight: bold; cursor: pointer;
+        display: flex; align-items: center; justify-content: center; text-align: center;
+        background: rgba(255, 255, 255, 0.4); /* 降低透明度 */
+        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); /* 模糊效果 */
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+
+    /* 主加号按钮 - 修正居中 */
+    .btn-add { 
+        width: 65px; height: 65px; background: #333; border-radius: 50%; border: none;
+        color: white; font-size: 40px; cursor: pointer;
+        display: flex; align-items: center; justify-content: center; /* Flex居中 */
+        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        line-height: 1; padding: 0; padding-bottom: 5px; /* 微调视觉中心 */
+    }
 
     /* 弹窗样式 */
-    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); z-index: 200; display: none; justify-content: center; align-items: center; }
-    .modal-content { background: white; width: 80%; max-width: 350px; padding: 25px; border-radius: 30px; position: relative; }
+    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 200; display: none; justify-content: center; align-items: center; }
+    .modal-content { background: white; width: 85%; max-width: 350px; padding: 25px; border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); }
     .input-field { width: 100%; padding: 14px; margin-bottom: 15px; background: #f7f8fa; border: 1px solid #eee; border-radius: 12px; box-sizing: border-box; outline: none; }
     #loading-mask { position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.9); border-radius:30px; display:none; flex-direction:column; justify-content:center; align-items:center; z-index:300; }
 </style>
@@ -57,30 +76,27 @@
 
 <div id="login-layer">
     <div style="font-size:60px; margin-bottom:20px;">🔐</div>
-    <div class="pin-title" id="pin-msg">欢迎回来，请输入密码</div>
+    <div id="pin-msg" style="margin-bottom:20px; font-weight:bold; color:#666;">安全验证</div>
     <input type="tel" id="pin-input" class="pin-input" maxlength="6" placeholder="••••••">
-    <button class="btn-unlock" onclick="checkPin()">确认进入</button>
+    <button class="btn-unlock" onclick="checkPin()">开启卡包</button>
 </div>
 
 <div id="app-layer">
-    <div class="main-title">
-        <span>我的卡包</span>
-        <span style="font-size:14px; color:#999; font-weight:normal;">Pro v2.0</span>
-    </div>
+    <div class="main-title">我的卡包</div>
     <div id="card-list"></div>
 </div>
 
 <div class="fab-container">
-    <button class="float-btn btn-backup" onclick="exportData()">备份<br>导出</button>
-    <button class="float-btn btn-import" onclick="triggerImport()">恢复<br>导入</button>
-    <button class="float-btn btn-add" onclick="showModal()">+</button>
+    <button class="float-btn-glass" onclick="exportData()">备份<br>导出</button>
+    <button class="float-btn-glass" onclick="triggerImport()">恢复<br>导入</button>
+    <button class="btn-add" onclick="showModal()"><span>+</span></button>
 </div>
 
 <div id="modal-add" class="modal">
     <div class="modal-content">
         <div id="loading-mask">识别中...</div>
         <h3 id="modal-title" style="text-align:center; margin-top:0;">添加新卡片</h3>
-        <input type="text" id="in-title" class="input-field" placeholder="名称">
+        <input type="text" id="in-title" class="input-field" placeholder="应用名称 (如: 百度)">
         <div style="position:relative">
             <input type="text" id="in-acc" class="input-field" placeholder="账号">
             <button onclick="startOCR('in-acc')" style="position:absolute; right:10px; top:10px; border:none; background:none; font-size:18px;">📷</button>
@@ -90,8 +106,8 @@
             <button onclick="startOCR('in-pwd')" style="position:absolute; right:10px; top:10px; border:none; background:none; font-size:18px;">📷</button>
         </div>
         <div style="display:flex; gap:10px; margin-top:10px;">
-            <button onclick="closeModal()" style="flex:1; padding:12px; border-radius:12px; background:#f0f2f5; border:none; color:#666;">取消</button>
-            <button onclick="saveItem()" style="flex:1; padding:12px; border-radius:12px; background:#333; color:white; border:none;">保存</button>
+            <button onclick="closeModal()" style="flex:1; padding:12px; border-radius:15px; background:#f0f2f5; border:none; color:#666; font-weight:bold;">取消</button>
+            <button onclick="saveItem()" style="flex:1; padding:12px; border-radius:15px; background:#333; color:white; border:none; font-weight:bold;">保存</button>
         </div>
     </div>
 </div>
@@ -101,10 +117,8 @@
     const PIN_KEY = 'colorful_vault_pin';
     
     let userPin = localStorage.getItem(PIN_KEY);
-    // 兼容旧数据
     let oldData = localStorage.getItem('cyber_vault_data') || localStorage.getItem('vault_ocr_v1');
     let vaultData = JSON.parse(localStorage.getItem(STORE_KEY)) || (oldData ? JSON.parse(oldData) : []);
-    
     let editIndex = null; 
     let currentTargetInputId = '';
 
@@ -115,7 +129,7 @@
         if(!val) return;
         if(!userPin) {
             userPin = val; localStorage.setItem(PIN_KEY, val);
-            alert("设置成功"); unlockApp();
+            unlockApp();
         } else if(val === userPin) { unlockApp(); } 
         else { alert("密码错误"); document.getElementById('pin-input').value = ''; }
     }
@@ -150,7 +164,6 @@
                         <div style="display:flex; gap:5px;">
                             <button class="capsule-btn" onclick="showEdit(${index})">修改</button>
                             <button class="capsule-btn" onclick="togglePwd(${index}, '${item.pwd}')">显示</button>
-                            <button class="capsule-btn" onclick="copyText('${item.pwd}')">复制</button>
                         </div>
                     </div>
                 </div>
@@ -160,16 +173,14 @@
     }
 
     function showModal() {
-        editIndex = null;
-        document.getElementById('modal-title').innerText = "添加新卡片";
+        editIndex = null; document.getElementById('modal-title').innerText = "添加新卡片";
         document.getElementById('in-title').value = ''; document.getElementById('in-acc').value = ''; document.getElementById('in-pwd').value = '';
         document.getElementById('modal-add').style.display = 'flex';
     }
 
     function showEdit(index) {
-        editIndex = index;
-        const item = vaultData[index];
-        document.getElementById('modal-title').innerText = "修改卡片";
+        editIndex = index; const item = vaultData[index];
+        document.getElementById('modal-title').innerText = "修改卡片信息";
         document.getElementById('in-title').value = item.title;
         document.getElementById('in-acc').value = item.acc;
         document.getElementById('in-pwd').value = item.pwd;
@@ -180,48 +191,39 @@
         const title = document.getElementById('in-title').value;
         const acc = document.getElementById('in-acc').value;
         const pwd = document.getElementById('in-pwd').value;
-        if(!title || !acc) return alert("名称和账号必填");
-
+        if(!title) return alert("名称必填");
         if(editIndex !== null) { vaultData[editIndex] = { title, acc, pwd }; } 
         else { vaultData.unshift({ title, acc, pwd }); }
-        
         localStorage.setItem(STORE_KEY, JSON.stringify(vaultData));
         closeModal(); renderList();
     }
 
     function exportData() {
-        if(vaultData.length === 0) return alert("无数据");
-        const dataStr = JSON.stringify(vaultData, null, 2);
-        const blob = new Blob([dataStr], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
+        if(vaultData.length === 0) return alert("暂无数据可备份");
+        const blob = new Blob([JSON.stringify(vaultData, null, 2)], { type: "application/json" });
         const a = document.createElement('a');
-        a.href = url;
-        a.download = `卡包备份_${new Date().toISOString().slice(0,10)}.json`;
+        a.href = URL.createObjectURL(blob);
+        a.download = `卡包备份_${new Date().toLocaleDateString()}.json`;
         a.click();
-        URL.revokeObjectURL(url);
     }
 
     function triggerImport() { document.getElementById('import-file-input').click(); }
     document.getElementById('import-file-input').onchange = function(e) {
-        const file = e.target.files[0];
-        if(!file) return;
+        const file = e.target.files[0]; if(!file) return;
         const reader = new FileReader();
         reader.onload = function(evt) {
             try {
-                const imported = JSON.parse(evt.target.result);
-                if(confirm("确定覆盖现有卡片吗？")) {
-                    vaultData = imported;
-                    localStorage.setItem(STORE_KEY, JSON.stringify(vaultData));
-                    renderList(); alert("恢复成功");
+                const data = JSON.parse(evt.target.result);
+                if(confirm("确定恢复备份并覆盖当前数据吗？")) {
+                    vaultData = data; localStorage.setItem(STORE_KEY, JSON.stringify(vaultData)); renderList();
                 }
-            } catch(e) { alert("文件无效"); }
+            } catch(e) { alert("文件格式无效"); }
         };
         reader.readAsText(file);
-        e.target.value = '';
     };
 
     function closeModal() { document.getElementById('modal-add').style.display = 'none'; }
-    function deleteItem(index) { if(confirm("删除吗？")) { vaultData.splice(index,1); localStorage.setItem(STORE_KEY, JSON.stringify(vaultData)); renderList(); } }
+    function deleteItem(index) { if(confirm("删除后无法找回，确定？")) { vaultData.splice(index,1); localStorage.setItem(STORE_KEY, JSON.stringify(vaultData)); renderList(); } }
     function copyText(txt) {
         const input = document.createElement('textarea'); input.value = txt; document.body.appendChild(input);
         input.select(); document.execCommand('copy'); document.body.removeChild(input); alert("已复制");
@@ -233,13 +235,12 @@
 
     function startOCR(id) { currentTargetInputId = id; document.getElementById('ocr-file-input').click(); }
     document.getElementById('ocr-file-input').onchange = function(e) {
-        const file = e.target.files[0];
-        if(!file) return;
+        const file = e.target.files[0]; if(!file) return;
         document.getElementById('loading-mask').style.display = 'flex';
         Tesseract.recognize(file, 'chi_sim+eng').then(({ data: { text } }) => {
             document.getElementById('loading-mask').style.display = 'none';
             document.getElementById(currentTargetInputId).value = text.replace(/\s+/g, '');
-        }).catch(err => { document.getElementById('loading-mask').style.display = 'none'; alert("OCR失败"); });
+        }).catch(() => { document.getElementById('loading-mask').style.display = 'none'; alert("识别失败"); });
     };
 </script>
 </body>
