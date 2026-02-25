@@ -3,294 +3,113 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>我的多彩卡包</title>
-<!-- 引入 OCR 引擎 -->
+<title>我的多彩卡包 Pro</title>
 <script src='https://unpkg.com/tesseract.js@4.0.2/dist/tesseract.min.js'></script>
 <style>
-    :root {
-        --bg-color: #f2f6f9; /* 浅灰白背景 */
-        --text-dark: #333333;
-        --text-gray: #888888;
-    }
+    :root { --bg-color: #f2f6f9; --text-dark: #333; --text-gray: #888; }
+    body { font-family: -apple-system, sans-serif; background-color: var(--bg-color); color: var(--text-dark); margin: 0; padding: 0; height: 100vh; overflow: hidden; }
 
-    body {
-        font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; /* 恢复默认字体 */
-        background-color: var(--bg-color);
-        color: var(--text-dark);
-        margin: 0;
-        padding: 0;
-        height: 100vh;
-        overflow: hidden;
-    }
+    /* 登录层 */
+    #login-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; z-index: 999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+    .pin-input { font-size: 28px; padding: 15px; text-align: center; border-radius: 20px; border: none; background: #f0f2f5; width: 200px; letter-spacing: 8px; outline: none; }
+    .btn-unlock { margin-top: 40px; padding: 15px 80px; border-radius: 40px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; font-size: 18px; font-weight: bold; cursor: pointer; }
 
-    /* === 1. 登录层：清新简约风 === */
-    #login-layer {
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: #ffffff;
-        z-index: 999;
-        display: flex; flex-direction: column; justify-content: center; align-items: center;
-    }
+    /* 主界面 */
+    #app-layer { padding: 20px; height: 100%; overflow-y: auto; display: none; padding-bottom: 120px; box-sizing: border-box; }
+    .main-title { font-size: 24px; font-weight: 800; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
     
-    .lock-emoji { font-size: 80px; margin-bottom: 20px; animation: bounce 2s infinite; }
-    @keyframes bounce { 0%, 100% {transform: translateY(0);} 50% {transform: translateY(-10px);} }
+    /* 工具栏按钮 */
+    .tools { display: flex; gap: 10px; margin-bottom: 15px; }
+    .tool-btn { background: #fff; border: 1px solid #ddd; padding: 6px 12px; border-radius: 10px; font-size: 12px; cursor: pointer; color: #666; }
 
-    .pin-title { font-size: 20px; color: #333; margin-bottom: 30px; font-weight: bold; }
-
-    .pin-input {
-        font-size: 28px; padding: 15px; text-align: center;
-        border-radius: 20px;
-        border: none;
-        background: #f0f2f5;
-        color: #333;
-        width: 200px; letter-spacing: 8px; outline: none;
-        box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
-    }
-
-    .btn-unlock {
-        margin-top: 40px; padding: 15px 80px; border-radius: 40px;
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        color: white; border: none; font-size: 18px; font-weight: bold; cursor: pointer;
-        box-shadow: 0 10px 20px rgba(118, 75, 162, 0.3);
-        transition: transform 0.1s;
-    }
-    .btn-unlock:active { transform: scale(0.95); }
-
-    /* === 2. 主界面 === */
-    #app-layer {
-        padding: 20px; height: 100%; overflow-y: auto; display: none;
-        padding-bottom: 120px; box-sizing: border-box;
-    }
-
-    .main-title {
-        font-size: 28px; font-weight: 800; color: #333;
-        margin-top: 10px; margin-bottom: 25px;
-        display: flex; align-items: center; justify-content: space-between;
-    }
-
-    /* === 3. 多彩卡片设计 (还原图片风格) === */
-    .card {
-        border-radius: 24px;
-        padding: 20px;
-        margin-bottom: 20px;
-        position: relative;
-        overflow: hidden;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-        transition: transform 0.2s;
-    }
-    .card:active { transform: scale(0.98); }
-
-    /* 装饰性的小圆球 */
-    .bubble {
-        position: absolute; border-radius: 50%; opacity: 0.6;
-    }
-
-    /* 四种颜色主题 */
-    /* 1. 薄荷绿 (像图中的 Facebook 卡片) */
-    .theme-1 { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); }
-    .theme-1 .bubble { background: #fff; opacity: 0.2; }
+    /* 卡片样式 */
+    .card { border-radius: 24px; padding: 20px; margin-bottom: 20px; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
+    .theme-1 { background: linear-gradient(135deg, #84fab0, #8fd3f4); }
+    .theme-2 { background: linear-gradient(135deg, #e0c3fc, #8ec5fc); }
+    .theme-3 { background: linear-gradient(135deg, #a18cd1, #fbc2eb); }
+    .theme-4 { background: linear-gradient(135deg, #fccb90, #d57eeb); }
     
-    /* 2. 香芋紫 (像图中的 Password 卡片) */
-    .theme-2 { background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); }
-    .theme-2 .bubble { background: #fff; opacity: 0.2; }
-
-    /* 3. 天空蓝 (像图中的 Cloud Storage 卡片) */
-    .theme-3 { background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); }
-    .theme-3 .bubble { background: #fff; opacity: 0.2; }
-
-    /* 4. 暖阳橙 (像图中的 Passwordrice 卡片) */
-    .theme-4 { background: linear-gradient(135deg, #fccb90 0%, #d57eeb 100%); }
-    .theme-4 .bubble { background: #fff; opacity: 0.2; }
-
-    /* 卡片标题区 */
-    .card-header {
-        display: flex; justify-content: space-between; align-items: center;
-        margin-bottom: 15px; position: relative; z-index: 2;
-    }
-    .card-icon {
-        width: 40px; height: 40px; background: rgba(255,255,255,0.9);
-        border-radius: 50%; display: flex; align-items: center; justify-content: center;
-        font-weight: bold; font-size: 18px; color: #555;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-    .card-name {
-        font-size: 18px; font-weight: bold; color: white;
-        text-shadow: 0 1px 2px rgba(0,0,0,0.1); flex: 1; margin-left: 15px;
-    }
-    .btn-delete {
-        background: rgba(255,255,255,0.3); border: none; color: white;
-        width: 30px; height: 30px; border-radius: 50%; font-size: 12px; cursor: pointer;
-    }
-
-    /* 白色内容框 (图中的白色区域) */
-    .card-content-box {
-        background: #ffffff;
-        border-radius: 16px;
-        padding: 15px;
-        position: relative; z-index: 2;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    }
-
-    .info-item { margin-bottom: 12px; }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; position: relative; z-index: 2; }
+    .card-name { font-size: 18px; font-weight: bold; color: white; flex: 1; }
+    .card-content-box { background: #ffffff; border-radius: 16px; padding: 15px; position: relative; z-index: 2; }
+    
     .info-label { font-size: 12px; color: #999; margin-bottom: 4px; }
-    .info-value-row { display: flex; justify-content: space-between; align-items: center; }
-    .info-value {
-        font-size: 16px; color: #333; font-weight: 500;
-        overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%;
-    }
+    .info-value-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .info-value { font-size: 15px; color: #333; font-weight: 500; word-break: break-all; max-width: 70%; }
     
-    /* 小胶囊按钮 */
-    .capsule-btn {
-        background: #f0f2f5; color: #666; padding: 4px 10px;
-        border-radius: 20px; font-size: 12px; border: none; cursor: pointer; font-weight: bold;
-    }
-    
-    /* === 悬浮添加按钮 === */
-    .fab-add {
-        position: fixed; bottom: 40px; right: 30px;
-        width: 65px; height: 65px;
-        background: #333; /* 黑色按钮，对比强烈 */
-        border-radius: 50%; color: white; font-size: 36px; border: none;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-        cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 100;
-        transition: transform 0.2s;
-    }
-    .fab-add:active { transform: scale(0.9); }
+    .capsule-btn { background: #f0f2f5; color: #666; padding: 4px 10px; border-radius: 20px; font-size: 12px; border: none; cursor: pointer; }
+    .btn-del { color: #ff4d4d; background: rgba(255,255,255,0.8); }
 
-    /* === 弹窗设计 === */
-    .modal {
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(255, 255, 255, 0.8); /* 浅色蒙层 */
-        backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-        z-index: 200; display: none; justify-content: center; align-items: center;
-    }
-    .modal-content {
-        background: white;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-        width: 80%; max-width: 350px; padding: 30px; border-radius: 30px;
-    }
-    .modal h3 { margin-top: 0; color: #333; font-size: 22px; text-align: center; margin-bottom: 25px;}
+    /* 悬浮按钮 */
+    .fab-add { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: #333; border-radius: 50%; color: white; font-size: 30px; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 100; cursor: pointer; }
 
-    .input-wrapper { position: relative; margin-bottom: 15px; }
-    .input-field {
-        width: 100%; padding: 15px; padding-right: 45px;
-        background: #f7f8fa; border: 1px solid #eee;
-        color: #333; border-radius: 15px; box-sizing: border-box; font-size: 16px;
-        transition: 0.3s; outline: none;
-    }
-    .input-field:focus { background: white; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
-
-    .btn-ocr-icon {
-        position: absolute; right: 8px; top: 8px;
-        width: 34px; height: 34px; border-radius: 10px;
-        background: #eef1f5; border: none; font-size: 18px; color: #555;
-        display: flex; align-items: center; justify-content: center; cursor: pointer;
-    }
-
-    .modal-btns { display: flex; gap: 15px; margin-top: 30px; }
-    .btn-main {
-        flex: 1; padding: 15px; border-radius: 15px; border: none; font-weight: bold; font-size: 16px;
-        background: #333; color: white;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    }
-    .btn-sub {
-        flex: 1; padding: 15px; border-radius: 15px; border: none;
-        background: #f0f2f5; color: #666; font-weight: bold;
-    }
-
-    /* OCR 加载 */
-    #loading-mask {
-        position: absolute; top:0; left:0; width:100%; height:100%;
-        background: rgba(255,255,255,0.9); border-radius: 30px;
-        display: none; flex-direction:column; justify-content:center; align-items:center; z-index: 300;
-    }
-    #ocr-file-input { display: none; }
+    /* 弹窗 */
+    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); z-index: 200; display: none; justify-content: center; align-items: center; }
+    .modal-content { background: white; width: 85%; max-width: 350px; padding: 25px; border-radius: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+    .input-field { width: 100%; padding: 12px; margin-bottom: 15px; background: #f7f8fa; border: 1px solid #eee; border-radius: 12px; box-sizing: border-box; outline: none; }
+    #loading-mask { display: none; text-align: center; padding: 20px; }
 </style>
 </head>
 <body>
 
-<input type="file" id="ocr-file-input" accept="image/*">
+<input type="file" id="ocr-file-input" style="display:none" accept="image/*">
+<input type="file" id="import-file-input" style="display:none" accept=".json">
 
-<!-- 1. 登录层 -->
 <div id="login-layer">
-    <div class="lock-emoji">🔐</div>
-    <div class="pin-title">欢迎回来，请输入密码</div>
-    <input type="tel" id="pin-input" class="pin-input" maxlength="6" placeholder="• • • • • •">
-    <button class="btn-unlock" onclick="checkPin()">进入卡包</button>
+    <div style="font-size:60px; margin-bottom:20px;">🔐</div>
+    <div id="pin-msg" style="margin-bottom:20px; font-weight:bold;">请输入密码进入</div>
+    <input type="tel" id="pin-input" class="pin-input" maxlength="6" placeholder="••••••">
+    <button class="btn-unlock" onclick="checkPin()">确认</button>
 </div>
 
-<!-- 2. 主应用层 -->
 <div id="app-layer">
     <div class="main-title">
-        <span>我的密码卡包</span>
-        <span style="font-size:14px; color:#999; font-weight:normal;">安全存储</span>
+        <span>我的卡包</span>
+        <div class="tools">
+            <button class="tool-btn" onclick="exportData()">备份(导出)</button>
+            <button class="tool-btn" onclick="triggerImport()">恢复(导入)</button>
+        </div>
     </div>
     <div id="card-list"></div>
 </div>
 
 <button class="fab-add" onclick="showModal()">+</button>
 
-<!-- 3. 添加/OCR 弹窗 -->
 <div id="modal-add" class="modal">
     <div class="modal-content">
-        <!-- OCR 加载状态 -->
-        <div id="loading-mask">
-            <div style="font-size:30px; animation:bounce 1s infinite">📷</div>
-            <div id="loading-text" style="color:#666; margin-top:15px; font-size:14px;">正在识别文字...</div>
-        </div>
-
-        <h3>添加新卡片</h3>
-        
-        <div class="input-wrapper">
-            <input type="text" id="in-title" class="input-field" placeholder="名称 (如: 微信)">
-        </div>
-
-        <div class="input-wrapper">
+        <div id="loading-mask">识别中...</div>
+        <h3 id="modal-title" style="text-align:center; margin-top:0;">添加新卡片</h3>
+        <input type="text" id="in-title" class="input-field" placeholder="名称 (如: 招商银行)">
+        <div style="position:relative">
             <input type="text" id="in-acc" class="input-field" placeholder="账号">
-            <button class="btn-ocr-icon" onclick="startOCR('in-acc')">📷</button>
+            <button onclick="startOCR('in-acc')" style="position:absolute; right:5px; top:5px; border:none; background:none; font-size:20px;">📷</button>
         </div>
-
-        <div class="input-wrapper">
-            <input type="text" id="in-pwd" class="input-field" placeholder="密码">
-            <button class="btn-ocr-icon" onclick="startOCR('in-pwd')">📷</button>
-        </div>
-
-        <div class="modal-btns">
-            <button class="btn-sub" onclick="closeModal()">取消</button>
-            <button class="btn-main" onclick="saveNewItem()">保存</button>
+        <input type="text" id="in-pwd" class="input-field" placeholder="密码 (可不填)">
+        <div style="display:flex; gap:10px;">
+            <button onclick="closeModal()" style="flex:1; padding:12px; border-radius:12px; border:none; background:#eee;">取消</button>
+            <button onclick="saveItem()" style="flex:1; padding:12px; border-radius:12px; border:none; background:#333; color:white;">保存</button>
         </div>
     </div>
 </div>
 
 <script>
-    const STORE_KEY = 'colorful_vault_data'; // 数据库名换一下，防止和之前的冲突
+    const STORE_KEY = 'colorful_vault_data';
     const PIN_KEY = 'colorful_vault_pin';
     let userPin = localStorage.getItem(PIN_KEY);
-    // 尝试读取旧数据，如果没有则初始化为空
-    let oldData = localStorage.getItem('cyber_vault_data') || localStorage.getItem('vault_ocr_v1');
-    let vaultData = JSON.parse(localStorage.getItem(STORE_KEY)) || (oldData ? JSON.parse(oldData) : []);
-    
+    let vaultData = JSON.parse(localStorage.getItem(STORE_KEY)) || [];
+    let editIndex = null; // 追踪当前修改的是哪一个
     let currentTargetInputId = '';
 
-    window.onload = function() {
-        if (!userPin) document.querySelector('.pin-title').innerText = "首次使用，请设置密码";
-    }
+    window.onload = () => { if(!userPin) document.getElementById('pin-msg').innerText = "首次使用，请设置6位密码"; };
 
-    /* === 1. 登录逻辑 === */
     function checkPin() {
-        const input = document.getElementById('pin-input').value;
-        if (!input) return;
-        if (!userPin) {
-            userPin = input;
-            localStorage.setItem(PIN_KEY, userPin);
-            alert("密码设置成功！");
-            unlockApp();
-        } else {
-            if (input === userPin) unlockApp();
-            else { 
-                alert("密码错误");
-                document.getElementById('pin-input').value = '';
-            }
-        }
+        const val = document.getElementById('pin-input').value;
+        if(val.length < 1) return;
+        if(!userPin) {
+            userPin = val; localStorage.setItem(PIN_KEY, val);
+            alert("密码设置成功！"); unlockApp();
+        } else if(val === userPin) { unlockApp(); } 
+        else { alert("密码错误"); document.getElementById('pin-input').value = ''; }
     }
 
     function unlockApp() {
@@ -299,51 +118,30 @@
         renderList();
     }
 
-    /* === 2. 核心：多彩列表渲染 === */
     function renderList() {
         const container = document.getElementById('card-list');
         container.innerHTML = '';
         vaultData.forEach((item, index) => {
-            // 计算颜色主题：0,1,2,3 循环
-            const themeIndex = (index % 4) + 1;
-            // 获取名称首字母
-            const firstLetter = item.title ? item.title[0].toUpperCase() : '#';
-
+            const theme = (index % 4) + 1;
             const card = document.createElement('div');
-            card.className = `card theme-${themeIndex}`;
-            
-            // 添加装饰气泡 (随机位置)
-            const bubble1Top = Math.random() * 80;
-            const bubble1Left = Math.random() * 80;
-            const bubbleSize = Math.random() * 30 + 10;
-            
+            card.className = `card theme-${theme}`;
             card.innerHTML = `
-                <div class="bubble" style="top:${bubble1Top}%; left:${bubble1Left}%; width:${bubbleSize}px; height:${bubbleSize}px;"></div>
-                
                 <div class="card-header">
-                    <div style="display:flex; align-items:center;">
-                        <div class="card-icon">${firstLetter}</div>
-                        <div class="card-name">${item.title}</div>
-                    </div>
-                    <button class="btn-delete" onclick="deleteItem(${index})">✕</button>
+                    <div class="card-name">${item.title}</div>
+                    <button class="capsule-btn btn-del" onclick="deleteItem(${index})">删除</button>
                 </div>
-
                 <div class="card-content-box">
-                    <div class="info-item">
-                        <div class="info-label">账号</div>
-                        <div class="info-value-row">
-                            <div class="info-value" onclick="copyText('${item.acc}')">${item.acc}</div>
-                            <button class="capsule-btn" onclick="copyText('${item.acc}')">复制</button>
-                        </div>
+                    <div class="info-label">账号</div>
+                    <div class="info-value-row">
+                        <div class="info-value">${item.acc}</div>
+                        <button class="capsule-btn" onclick="copyText('${item.acc}')">复制</button>
                     </div>
-                    <div class="info-item" style="margin-bottom:0;">
-                        <div class="info-label">密码</div>
-                        <div class="info-value-row">
-                            <div class="info-value" id="pwd-txt-${index}" onclick="copyText('${item.pwd}')">••••••</div>
-                            <div>
-                                <button class="capsule-btn" style="margin-right:5px;" onclick="togglePwd(${index}, '${item.pwd}')">显示</button>
-                                <button class="capsule-btn" onclick="copyText('${item.pwd}')">复制</button>
-                            </div>
+                    <div class="info-label">密码</div>
+                    <div class="info-value-row" style="margin-bottom:0">
+                        <div class="info-value" id="p-txt-${index}">••••••</div>
+                        <div>
+                            <button class="capsule-btn" onclick="showEdit(${index})">修改</button>
+                            <button class="capsule-btn" onclick="togglePwd(${index},'${item.pwd}')">显示</button>
                         </div>
                     </div>
                 </div>
@@ -352,89 +150,100 @@
         });
     }
 
-    /* === 3. OCR 逻辑 === */
-    function startOCR(inputId) {
-        currentTargetInputId = inputId;
-        document.getElementById('ocr-file-input').click();
-    }
-
-    document.getElementById('ocr-file-input').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        document.getElementById('loading-mask').style.display = 'flex';
-        document.getElementById('loading-text').innerText = '正在加载引擎...';
-
-        Tesseract.recognize(
-            file,
-            'eng+chi_sim', 
-            {
-                logger: m => {
-                    if(m.status === 'recognizing text') {
-                        document.getElementById('loading-text').innerText = `识别中: ${(m.progress * 100).toFixed(0)}%`;
-                    }
-                }
-            }
-        ).then(({ data: { text } }) => {
-            document.getElementById('loading-mask').style.display = 'none';
-            const cleanText = text.replace(/\s+/g, '');
-            if(currentTargetInputId) {
-                document.getElementById(currentTargetInputId).value = cleanText;
-            }
-            document.getElementById('ocr-file-input').value = '';
-        }).catch(err => {
-            document.getElementById('loading-mask').style.display = 'none';
-            alert("识别失败: " + err);
-        });
-    });
-
-    /* === 4. 功能函数 === */
-    function showModal() { document.getElementById('modal-add').style.display = 'flex'; }
-    function closeModal() { document.getElementById('modal-add').style.display = 'none'; }
-
-    function saveNewItem() {
-        const title = document.getElementById('in-title').value;
-        const acc = document.getElementById('in-acc').value;
-        const pwd = document.getElementById('in-pwd').value;
-        
-        if (!title) return alert("请输入名称");
-
-        vaultData.unshift({ title, acc, pwd });
-        localStorage.setItem(STORE_KEY, JSON.stringify(vaultData));
-        
+    /* 修改功能逻辑 */
+    function showModal() {
+        editIndex = null;
+        document.getElementById('modal-title').innerText = "添加新卡片";
         document.getElementById('in-title').value = '';
         document.getElementById('in-acc').value = '';
         document.getElementById('in-pwd').value = '';
+        document.getElementById('modal-add').style.display = 'flex';
+    }
+
+    function showEdit(index) {
+        editIndex = index;
+        const item = vaultData[index];
+        document.getElementById('modal-title').innerText = "修改卡片";
+        document.getElementById('in-title').value = item.title;
+        document.getElementById('in-acc').value = item.acc;
+        document.getElementById('in-pwd').value = item.pwd;
+        document.getElementById('modal-add').style.display = 'flex';
+    }
+
+    function saveItem() {
+        const title = document.getElementById('in-title').value;
+        const acc = document.getElementById('in-acc').value;
+        const pwd = document.getElementById('in-pwd').value;
+        if(!title || !acc) return alert("名称和账号不能为空");
+
+        if(editIndex !== null) {
+            vaultData[editIndex] = { title, acc, pwd };
+        } else {
+            vaultData.unshift({ title, acc, pwd });
+        }
+        
+        localStorage.setItem(STORE_KEY, JSON.stringify(vaultData));
         closeModal();
         renderList();
     }
 
-    function deleteItem(index) {
-        if(confirm("确定删除这个卡片吗？")) {
-            vaultData.splice(index, 1);
-            localStorage.setItem(STORE_KEY, JSON.stringify(vaultData));
-            renderList();
-        }
-    }
-    
-    function copyText(text) {
-        const ta = document.createElement('textarea');
-        ta.value = text;
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand('copy');
-        document.body.removeChild(ta);
-        alert("已复制！");
+    /* 备份与导入逻辑 */
+    function exportData() {
+        if(vaultData.length === 0) return alert("没有数据可以导出");
+        const dataStr = JSON.stringify(vaultData, null, 2);
+        const blob = new Blob([dataStr], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `我的卡包备份_${new Date().toLocaleDateString()}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
     }
 
-    function togglePwd(index, realPwd) {
-        const valDiv = document.getElementById(`pwd-txt-${index}`);
-        if(valDiv.innerText.includes('•')) {
-            valDiv.innerText = realPwd;
-        } else {
-            valDiv.innerText = '••••••';
-        }
+    function triggerImport() { document.getElementById('import-file-input').click(); }
+
+    document.getElementById('import-file-input').onchange = function(e) {
+        const file = e.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            try {
+                const imported = JSON.parse(evt.target.result);
+                if(confirm("导入将覆盖当前所有卡片，确定吗？")) {
+                    vaultData = imported;
+                    localStorage.setItem(STORE_KEY, JSON.stringify(vaultData));
+                    renderList();
+                    alert("导入成功！");
+                }
+            } catch(e) { alert("文件格式错误，导入失败"); }
+        };
+        reader.readAsText(file);
+        e.target.value = ''; // 清除选择
+    };
+
+    /* 辅助功能 */
+    function closeModal() { document.getElementById('modal-add').style.display = 'none'; }
+    function deleteItem(index) { if(confirm("删除后无法撤销，确定吗？")) { vaultData.splice(index,1); localStorage.setItem(STORE_KEY, JSON.stringify(vaultData)); renderList(); } }
+    function copyText(txt) { 
+        const input = document.createElement('input'); input.value = txt; document.body.appendChild(input); 
+        input.select(); document.execCommand('copy'); document.body.removeChild(input); alert("已复制");
     }
+    function togglePwd(idx, pwd) {
+        const el = document.getElementById(`p-txt-${idx}`);
+        el.innerText = el.innerText === '••••••' ? (pwd || '未设密码') : '••••••';
+    }
+
+    /* OCR 逻辑保持不变 */
+    function startOCR(id) { currentTargetInputId = id; document.getElementById('ocr-file-input').click(); }
+    document.getElementById('ocr-file-input').onchange = function(e) {
+        const file = e.target.files[0];
+        if(!file) return;
+        document.getElementById('loading-mask').style.display = 'block';
+        Tesseract.recognize(file, 'chi_sim+eng').then(({ data: { text } }) => {
+            document.getElementById('loading-mask').style.display = 'none';
+            document.getElementById(currentTargetInputId).value = text.replace(/\s+/g, '');
+        });
+    };
 </script>
 </body>
 </html>
